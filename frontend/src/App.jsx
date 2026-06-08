@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import axios from "axios";
-import { useEffect } from "react";
+import LoadingSpinner from "./components/LoadingSpinner";
+import Note from "./components/Note";
+import api from "./services/api";
+
 function App() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchNotes();
@@ -14,7 +18,8 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/notes", {
+      setLoading(true);
+      const response = await api.post("/notes", {
         title,
         description,
       });
@@ -27,21 +32,23 @@ function App() {
       setDescription("");
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
-
   const fetchNotes = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/notes");
+      const response = await api.get("/notes");
 
       setNotes(response.data);
     } catch (error) {
       console.log(error);
     }
   };
+
   const deleteNote = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/notes/${id}`);
+      await api.delete(`/notes/${id}`);
 
       fetchNotes();
     } catch (error) {
@@ -83,14 +90,13 @@ function App() {
 
       <h2>All Notes</h2>
 
-      {notes.map((note) => (
-        <div key={note._id}>
-          <h3>{note.title}</h3>
-          <p>{note.description}</p>
-          <button onClick={() => deleteNote(note._id)}>Delete</button>
-          <hr />
-        </div>
-      ))}
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        notes.map((note) => (
+          <Note key={note._id} note={note} deleteNote={deleteNote} />
+        ))
+      )}
     </>
   );
 }
