@@ -59,6 +59,10 @@ function App() {
   return (
     <>
       <h1>Notes Manager</h1>
+      <h3>
+        Add a new note by filling out the form below. Your notes will be
+        displayed in the list below.
+      </h3>
 
       <form onSubmit={handleSubmit}>
         <label htmlFor="Titleid">Title</label>
